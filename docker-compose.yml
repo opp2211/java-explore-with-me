@@ -1,15 +1,24 @@
-version: '3.1'
+version: '3.8'
 services:
   stats-server:
+    build: ewm-stat-service/stat_server
+    container_name: ewm-stat-server
     ports:
       - "9090:9090"
+    depends_on:
+      - stats-db
 
   stats-db:
     image: postgres:14-alpine
+    container_name: stat-db
+    environment:
+      - POSTGRES_DB=shareit
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=pass
 
-  ewm-service:
-    ports:
-      - "8080:8080"
-
-  ewm-db:
-    image: postgres:14-alpine
+#  ewm-service:
+#    ports:
+#      - "8080:8080"
+#
+#  ewm-db:
+#    image: postgres:14-alpine
