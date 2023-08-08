@@ -13,5 +13,5 @@ public class EndpointHitDto {
     private String ip;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @JsonProperty("timestamp")
-    LocalDateTime hitDatetime;
+    private LocalDateTime hitDatetime;
 }
