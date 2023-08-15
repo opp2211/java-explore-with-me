@@ -11,6 +11,7 @@ import ru.practicum.model.User;
 import ru.practicum.repository.UserRepository;
 
 
+import javax.persistence.EntityNotFoundException;
 import java.security.InvalidParameterException;
 import java.util.Collection;
 import java.util.List;
@@ -51,5 +52,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public void delete(long userId) {
         userRepository.deleteById(userId);
+    }
+
+    @Override
+    public User getById(long id) {
+        return userRepository.findById(id).orElseThrow(() ->
+                new EntityNotFoundException(String.format("User ID = %d not found!", id)));
     }
 }

@@ -1,3 +1,5 @@
+package ru.practicum.statsclient;
+
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
