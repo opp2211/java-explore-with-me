@@ -15,6 +15,7 @@ import ru.practicum.service.category.CategoryService;
 import ru.practicum.service.user.UserService;
 import ru.practicum.statsclient.StatsClient;
 
+import javax.persistence.EntityNotFoundException;
 import java.security.InvalidParameterException;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -90,5 +91,11 @@ public class EventServiceImpl implements EventService {
         }
         //todo
         return eventFullDto;
+    }
+
+    @Override
+    public Event getById(long id) {
+        return eventRepository.findById(id).orElseThrow(() ->
+                new EntityNotFoundException(String.format("Event ID = %d not found!", id)));
     }
 }
