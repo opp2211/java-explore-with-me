@@ -18,8 +18,7 @@ import ru.practicum.statsclient.StatsClient;
 import javax.persistence.EntityNotFoundException;
 import java.security.InvalidParameterException;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -97,5 +96,19 @@ public class EventServiceImpl implements EventService {
     public Event getById(long id) {
         return eventRepository.findById(id).orElseThrow(() ->
                 new EntityNotFoundException(String.format("Event ID = %d not found!", id)));
+    }
+
+    @Override
+    public List<Event> getAllByIds(Collection<Long> ids) {
+        Set<Long> setIds = new HashSet<>(ids);
+        List<Event> foundEvents = eventRepository.findAllById(setIds);
+        Set<Long> foundIds = foundEvents.stream()
+                .map(Event::getId)
+                .collect(Collectors.toSet());
+        setIds.removeAll(foundIds);
+        if (!setIds.isEmpty()) {
+            throw new EntityNotFoundException(String.format("Event IDs = %s not found!", setIds));
+        }
+        return foundEvents;
     }
 }

@@ -4,6 +4,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "events")
@@ -60,4 +61,11 @@ public class Event {
 
     @Column(name = "location_lon")
     private Float locationLon;
+
+    @ManyToMany
+    @JoinTable(
+            name = "event_compilations",
+            joinColumns = @JoinColumn(name = "event_id"),
+            inverseJoinColumns = @JoinColumn(name = "compilation_id"))
+    private List<Compilation> compilations;
 }
