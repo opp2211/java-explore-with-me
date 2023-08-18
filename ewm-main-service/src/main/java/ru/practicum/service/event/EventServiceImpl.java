@@ -4,10 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.dto.ViewStats;
-import ru.practicum.dto.event.EventFullDto;
-import ru.practicum.dto.event.EventMapper;
-import ru.practicum.dto.event.EventShortDto;
-import ru.practicum.dto.event.NewEventDto;
+import ru.practicum.dto.event.*;
 import ru.practicum.model.Event;
 import ru.practicum.model.EventState;
 import ru.practicum.repository.EventRepository;
@@ -110,5 +107,87 @@ public class EventServiceImpl implements EventService {
             throw new EntityNotFoundException(String.format("Event IDs = %s not found!", setIds));
         }
         return foundEvents;
+    }
+
+    @Override
+    public List<EventFullDto> getAllFiltered(List<Long> userIds, List<String> strStates, List<Long> catIds,
+                                             LocalDateTime rangeStart, LocalDateTime rangeEnd, int from, int size) {
+        if (from % size != 0) {
+            throw new InvalidParameterException(String.format(
+                    "Parameter 'from'(%d) must be a multiple of parameter 'size'(%d)", from, size));
+        }
+        return eventRepository.getAllFiltered(userIds, strStates, catIds, rangeStart, rangeEnd, from, size).stream()
+                .map(eventMapper::toEventFullDto)
+                .collect(Collectors.toList());
+        //todo: append views and CR
+    }
+
+    @Override
+    public EventFullDto adminUpdate(long eventId, UpdateEventAdminRequest updateDto) {
+        if (LocalDateTime.now().plusHours(1).isAfter(updateDto.getEventDate())) {
+            throw new RuntimeException();
+        }
+        Event event = getById(eventId);
+        if (updateDto.getStateAction() != null) {
+            if (event.getState() != EventState.PENDING) {
+                throw new RuntimeException();
+            }
+            switch (updateDto.getStateAction()){
+                case PUBLISH_EVENT:
+                    event.setState(EventState.PUBLISHED);
+                    event.setPublishedOn(LocalDateTime.now());
+                    break;
+                case REJECT_EVENT:
+                    event.setState(EventState.CANCELED);
+                    break;
+            }
+        }
+        applyPatchChanges(event, updateDto);
+        eventRepository.save(event);
+        return eventMapper.toEventFullDto(event);
+    }
+
+    private void applyPatchChanges(Event event, UpdateEventAdminRequest updateDto) {
+        String newTitle = updateDto.getTitle();
+        if (newTitle != null) {
+            event.setTitle(newTitle);
+        }
+        String newAnnotation = updateDto.getAnnotation();
+        if (newAnnotation != null) {
+            event.setTitle(newAnnotation);
+        }
+        String newDescription = updateDto.getDescription();
+        if (newDescription != null) {
+            event.setTitle(newDescription);
+        }
+        LocalDateTime newEventDate = updateDto.getEventDate();
+        if (newEventDate != null) {
+            event.setEventDate(newEventDate);
+        }
+        Long newCategoryId = updateDto.getCategory();
+        if (newCategoryId != null) {
+            event.setCategory(categoryService.getById(newCategoryId));
+        }
+        Boolean newPaid = updateDto.getPaid();
+        if (newPaid != null) {
+            event.setPaid(newPaid);
+        }
+        Long newPartyLimit = updateDto.getParticipantLimit();
+        if (newPartyLimit != null) {
+            event.setParticipantLimit(newPartyLimit);
+        }
+        Boolean newRequestModeration = updateDto.getRequestModeration();
+        if (newRequestModeration != null) {
+            event.setRequestModeration(newRequestModeration);
+        }
+        Location newLocation = updateDto.getLocation();
+        if (newLocation != null) {
+            if (newLocation.getLat() != null) {
+                event.setLocationLat(updateDto.getLocation().getLat());
+            }
+            if (newLocation.getLon() != null) {
+                event.setLocationLon(updateDto.getLocation().getLon());
+            }
+        }
     }
 }
