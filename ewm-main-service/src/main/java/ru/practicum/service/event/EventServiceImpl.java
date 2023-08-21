@@ -110,13 +110,13 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventFullDto> getAllFiltered(List<Long> userIds, List<String> strStates, List<Long> catIds,
-                                             LocalDateTime rangeStart, LocalDateTime rangeEnd, int from, int size) {
+    public List<EventFullDto> getAllAdminFiltered(List<Long> userIds, List<String> strStates, List<Long> catIds,
+                                                  LocalDateTime rangeStart, LocalDateTime rangeEnd, int from, int size) {
         if (from % size != 0) {
             throw new InvalidParameterException(String.format(
                     "Parameter 'from'(%d) must be a multiple of parameter 'size'(%d)", from, size));
         }
-        return eventRepository.getAllFiltered(userIds, strStates, catIds, rangeStart, rangeEnd, from, size).stream()
+        return eventRepository.getAllAdminFiltered(userIds, strStates, catIds, rangeStart, rangeEnd, from, size).stream()
                 .map(eventMapper::toEventFullDto)
                 .collect(Collectors.toList());
         //todo: append views and CR
@@ -144,6 +144,36 @@ public class EventServiceImpl implements EventService {
         }
         applyPatchChanges(event, updateDto);
         eventRepository.save(event);
+        return eventMapper.toEventFullDto(event);
+    }
+
+    @Override
+    public List<EventShortDto> getAllPublicFiltered(String text, List<Long> catIds, Boolean paid,
+                                                    LocalDateTime rangeStart, LocalDateTime rangeEnd,
+                                                    Boolean onlyAvailable, EventSort sort, int from, int size) {
+        if (from % size != 0) {
+            throw new InvalidParameterException(String.format(
+                    "Parameter 'from'(%d) must be a multiple of parameter 'size'(%d)", from, size));
+        }
+        if (rangeStart == null && rangeEnd == null) {
+            rangeStart = LocalDateTime.now();
+        }
+        List<EventShortDto> shortEvents = eventRepository.getAllPublicFiltered(
+                text, catIds, paid, rangeStart, rangeEnd, onlyAvailable, from, size).stream()
+                .map(eventMapper::toEventShortDto)
+                .collect(Collectors.toList());
+        //todo: append Views and CR
+        if (sort == EventSort.VIEWS) {
+            shortEvents.sort(Comparator.comparing(EventShortDto::getViews));
+        }
+        return shortEvents;
+    }
+
+    @Override
+    public EventFullDto getPublicById(long id) {
+        Event event = eventRepository.findByIdAndState(id, EventState.PUBLISHED).orElseThrow(() ->
+                new EntityNotFoundException(String.format("Event ID = %d not found or unavailable!", id)));
+        //todo: append views and CR
         return eventMapper.toEventFullDto(event);
     }
 

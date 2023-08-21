@@ -29,7 +29,7 @@ public class EventController {
             @RequestParam(required = false) LocalDateTime rangeEnd,
             @RequestParam(defaultValue = "0") @PositiveOrZero int from,
             @RequestParam(defaultValue = "10") @Positive int size) {
-        return eventService.getAllFiltered(userIds, strStates, catIds, rangeStart, rangeEnd, from, size);
+        return eventService.getAllAdminFiltered(userIds, strStates, catIds, rangeStart, rangeEnd, from, size);
     }
 
     @PatchMapping("/{eventId}")

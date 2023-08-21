@@ -3,6 +3,7 @@ package ru.practicum.repository.custom;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import ru.practicum.model.Event;
+import ru.practicum.model.EventState;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
@@ -19,8 +20,8 @@ import java.util.List;
 public class EventRepositoryImpl implements EventRepositoryCustom {
     private final EntityManager em;
     @Override
-    public List<Event> getAllFiltered(List<Long> userIds, List<String> strStates, List<Long> catIds,
-                                      LocalDateTime rangeStart, LocalDateTime rangeEnd, int from, int size) {
+    public List<Event> getAllAdminFiltered(List<Long> userIds, List<String> strStates, List<Long> catIds,
+                                           LocalDateTime rangeStart, LocalDateTime rangeEnd, int from, int size) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Event> cq = cb.createQuery(Event.class);
         Root<Event> event = cq.from(Event.class);
@@ -43,6 +44,44 @@ public class EventRepositoryImpl implements EventRepositoryCustom {
         }
 
         cq.where(predicates.toArray(new Predicate[0]));
+        TypedQuery<Event> typedQuery = em.createQuery(cq);
+        typedQuery.setFirstResult(from);
+        typedQuery.setMaxResults(size);
+        return typedQuery.getResultList();
+    }
+
+    @Override
+    public List<Event> getAllPublicFiltered(String text, List<Long> catIds, Boolean paid,
+                                            LocalDateTime rangeStart, LocalDateTime rangeEnd,
+                                            Boolean onlyAvailable, int from, int size) {
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<Event> cq = cb.createQuery(Event.class);
+        Root<Event> event = cq.from(Event.class);
+
+        List<Predicate> predicates = new ArrayList<>();
+        predicates.add(cb.equal(event.get("state"), EventState.PUBLISHED));
+
+        if (text != null) {
+            Predicate annotationLike = cb.like(cb.upper(event.get("annotation")), "%" + text.toUpperCase() + "%");
+            Predicate descriptionLike = cb.like(cb.upper(event.get("description")), "%" + text.toUpperCase() + "%");
+            predicates.add(cb.or(annotationLike, descriptionLike));
+        }
+        if (catIds != null && !catIds.isEmpty()) {
+            predicates.add(event.get("category_id").in(catIds));
+        }
+        if (paid != null) {
+            predicates.add(cb.equal(event.get("paid"), paid));
+        }
+        if (rangeStart != null) {
+            predicates.add(cb.greaterThanOrEqualTo(event.get("event_date"), rangeStart));
+        }
+        if (rangeEnd != null) {
+            predicates.add(cb.lessThanOrEqualTo(event.get("event_date"), rangeEnd));
+        }
+        //todo: onlyAvailable
+
+        cq.where(predicates.toArray(new Predicate[0]));
+        cq.orderBy(cb.desc(event.get("event_date")));
         TypedQuery<Event> typedQuery = em.createQuery(cq);
         typedQuery.setFirstResult(from);
         typedQuery.setMaxResults(size);

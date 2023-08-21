@@ -1,9 +1,6 @@
 package ru.practicum.service.event;
 
-import ru.practicum.dto.event.EventFullDto;
-import ru.practicum.dto.event.EventShortDto;
-import ru.practicum.dto.event.NewEventDto;
-import ru.practicum.dto.event.UpdateEventAdminRequest;
+import ru.practicum.dto.event.*;
 import ru.practicum.model.Event;
 
 import java.time.LocalDateTime;
@@ -16,7 +13,13 @@ public interface EventService {
     EventFullDto getByIdAndUserId(long userId, long eventId);
     Event getById(long id);
     List<Event> getAllByIds(Collection<Long> ids);
-    List<EventFullDto> getAllFiltered(List<Long> userIds, List<String> strStates, List<Long> catIds,
-                                      LocalDateTime rangeStart, LocalDateTime rangeEnd, int from, int size);
+    List<EventFullDto> getAllAdminFiltered(List<Long> userIds, List<String> strStates, List<Long> catIds,
+                                           LocalDateTime rangeStart, LocalDateTime rangeEnd, int from, int size);
     EventFullDto adminUpdate(long eventId, UpdateEventAdminRequest updateDto);
+
+    List<EventShortDto> getAllPublicFiltered(String text, List<Long> catIds, Boolean paid,
+                                             LocalDateTime rangeStart, LocalDateTime rangeEnd,
+                                             Boolean onlyAvailable, EventSort sort,
+                                             int from, int size);
+    EventFullDto getPublicById(long id);
 }
