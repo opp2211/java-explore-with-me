@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.event.EventFullDto;
 import ru.practicum.dto.event.EventShortDto;
 import ru.practicum.dto.event.NewEventDto;
+import ru.practicum.dto.event.UpdateEventDto;
 import ru.practicum.service.event.EventService;
 
 import javax.validation.Valid;
@@ -33,9 +34,17 @@ public class EventController {
         return eventService.getAllByUserId(userId, from, size);
     }
 
-    @GetMapping
+    @GetMapping("/{eventId}")
     public EventFullDto getByIdAndUserId(@Positive @PathVariable long userId,
                                          @Positive @PathVariable long eventId) {
         return eventService.getByIdAndUserId(userId, eventId);
     }
+
+    @PatchMapping("/{eventId}")
+    public EventFullDto update(@Positive @PathVariable long userId,
+                               @Positive @PathVariable long eventId,
+                               @Valid @RequestBody UpdateEventDto updateDto) {
+        return eventService.userUpdate(userId, eventId, updateDto);
+    }
+
 }

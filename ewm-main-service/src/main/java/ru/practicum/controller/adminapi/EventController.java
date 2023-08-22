@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.event.EventFullDto;
-import ru.practicum.dto.event.UpdateEventAdminRequest;
+import ru.practicum.dto.event.UpdateEventDto;
 import ru.practicum.service.event.EventService;
 
 import javax.validation.Valid;
@@ -34,7 +34,7 @@ public class EventController {
 
     @PatchMapping("/{eventId}")
     public EventFullDto update(@Positive @PathVariable long eventId,
-                               @Valid @RequestBody UpdateEventAdminRequest updateDto) {
+                               @Valid @RequestBody UpdateEventDto updateDto) {
         return eventService.adminUpdate(eventId, updateDto);
     }
 }

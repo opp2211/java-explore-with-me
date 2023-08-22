@@ -15,10 +15,11 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UpdateEventAdminRequest {
+public class UpdateEventDto {
     @NullableNotBlank
-    @Size(min = 20, max = 120)
+    @Size(min = 3, max = 120)
     private String title;
+
     @NullableNotBlank
     @Size(min = 20, max = 2000)
     private String annotation;

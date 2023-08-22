@@ -123,7 +123,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventFullDto adminUpdate(long eventId, UpdateEventAdminRequest updateDto) {
+    public EventFullDto adminUpdate(long eventId, UpdateEventDto updateDto) {
         if (LocalDateTime.now().plusHours(1).isAfter(updateDto.getEventDate())) {
             throw new RuntimeException();
         }
@@ -177,7 +177,33 @@ public class EventServiceImpl implements EventService {
         return eventMapper.toEventFullDto(event);
     }
 
-    private void applyPatchChanges(Event event, UpdateEventAdminRequest updateDto) {
+    @Override
+    public EventFullDto userUpdate(long userId, long eventId, UpdateEventDto updateDto) {
+        if (LocalDateTime.now().plusHours(2).isAfter(updateDto.getEventDate())) {
+            throw new RuntimeException();
+        }
+        userService.getById(userId);
+        Event event = getById(eventId);
+        if (event.getState() == EventState.PUBLISHED) {
+            throw new RuntimeException();
+        }
+        if (userId != event.getInitiator().getId()) {
+            throw new RuntimeException();
+        }
+        switch (updateDto.getStateAction()) {
+            case SEND_TO_REVIEW:
+                event.setState(EventState.PENDING);
+                break;
+            case CANCEL_REVIEW:
+                event.setState(EventState.CANCELED);
+                break;
+        }
+        applyPatchChanges(event, updateDto);
+        eventRepository.save(event);
+        return eventMapper.toEventFullDto(event);
+    }
+
+    private void applyPatchChanges(Event event, UpdateEventDto updateDto) {
         String newTitle = updateDto.getTitle();
         if (newTitle != null) {
             event.setTitle(newTitle);

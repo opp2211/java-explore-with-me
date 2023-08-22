@@ -15,11 +15,13 @@ public interface EventService {
     List<Event> getAllByIds(Collection<Long> ids);
     List<EventFullDto> getAllAdminFiltered(List<Long> userIds, List<String> strStates, List<Long> catIds,
                                            LocalDateTime rangeStart, LocalDateTime rangeEnd, int from, int size);
-    EventFullDto adminUpdate(long eventId, UpdateEventAdminRequest updateDto);
+    EventFullDto adminUpdate(long eventId, UpdateEventDto updateDto);
 
     List<EventShortDto> getAllPublicFiltered(String text, List<Long> catIds, Boolean paid,
                                              LocalDateTime rangeStart, LocalDateTime rangeEnd,
                                              Boolean onlyAvailable, EventSort sort,
                                              int from, int size);
     EventFullDto getPublicById(long id);
+
+    EventFullDto userUpdate(long userId, long eventId, UpdateEventDto updateDto);
 }
