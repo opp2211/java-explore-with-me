@@ -12,7 +12,7 @@ public interface CompilationService {
 
     CompilationDto update(NewCompilationDto newCompilationDto, long compId);
 
-    List<CompilationDto> getAllDtos(boolean pinned, int from, int size);
+    List<CompilationDto> getAllDtos(Boolean pinned, int from, int size);
 
     CompilationDto getDtoById(long compId);
 }

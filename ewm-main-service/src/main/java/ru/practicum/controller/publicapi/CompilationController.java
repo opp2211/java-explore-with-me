@@ -18,14 +18,14 @@ public class CompilationController {
     private final CompilationService compilationService;
 
     @GetMapping
-    public List<CompilationDto> getAll(@RequestParam boolean pinned,
-                                       @PositiveOrZero @RequestParam(defaultValue = "0") int from,
-                                       @Positive @RequestParam(defaultValue = "10") int size) {
+    public List<CompilationDto> getAll(@RequestParam(required = false) Boolean pinned,
+                                       @RequestParam(defaultValue = "0") @PositiveOrZero int from,
+                                       @RequestParam(defaultValue = "10") @Positive int size) {
         return compilationService.getAllDtos(pinned, from, size);
     }
 
     @GetMapping("/{compId}")
-    public CompilationDto getById(@Positive @PathVariable long compId) {
+    public CompilationDto getById(@PathVariable @Positive long compId) {
         return compilationService.getDtoById(compId);
     }
 }

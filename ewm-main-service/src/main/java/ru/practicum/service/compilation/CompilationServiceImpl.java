@@ -2,16 +2,18 @@ package ru.practicum.service.compilation;
 
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import ru.practicum.dto.compilation.CompilationDto;
 import ru.practicum.dto.compilation.CompilationMapper;
 import ru.practicum.dto.compilation.NewCompilationDto;
+import ru.practicum.exception.NotFoundException;
 import ru.practicum.model.Compilation;
 import ru.practicum.repository.CompilationRepository;
 import ru.practicum.service.event.EventService;
+import ru.practicum.validator.StaticValidator;
 
 import javax.persistence.EntityNotFoundException;
-import java.security.InvalidParameterException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -46,13 +48,12 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     @Override
-    public List<CompilationDto> getAllDtos(boolean pinned, int from, int size) {
-        if (from % size != 0) {
-            throw new InvalidParameterException(String.format(
-                    "Parameter 'from'(%d) must be a multiple of parameter 'size'(%d)", from, size));
-        }
-        List<Compilation> compilations =
-                compilationRepository.findAllByPinned(pinned, PageRequest.of(from/size, size));
+    public List<CompilationDto> getAllDtos(Boolean pinned, int from, int size) {
+        StaticValidator.validateFromSize(from, size);
+        Pageable pageable = PageRequest.of(from/size, size);
+        List<Compilation> compilations = pinned != null ?
+                compilationRepository.findAllByPinned(pinned, pageable) :
+                compilationRepository.findAll(pageable).toList();
         //todo: fill views and confirmedReq
         return compilations.stream()
                 .map(compilationMapper::toCompilationDto)
@@ -67,6 +68,6 @@ public class CompilationServiceImpl implements CompilationService {
 
     private Compilation getById(long compId) {
         return compilationRepository.findById(compId).orElseThrow(() ->
-                new EntityNotFoundException(String.format("Compilation ID = %d not found!", compId)));
+                new NotFoundException(String.format("Compilation ID = %d not found!", compId)));
     }
 }

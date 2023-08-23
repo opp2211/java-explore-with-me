@@ -1,4 +1,6 @@
-package ru.practicum.validator;
+package ru.practicum.validator.annotationused;
+
+import ru.practicum.validator.annotation.NullableNotBlank;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;

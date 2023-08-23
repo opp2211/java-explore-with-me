@@ -1,4 +1,6 @@
-package ru.practicum.validator;
+package ru.practicum.validator.annotation;
+
+import ru.practicum.validator.annotationused.NoSooner2hFromNowValidator;
 
 import javax.validation.Constraint;
 import javax.validation.Payload;

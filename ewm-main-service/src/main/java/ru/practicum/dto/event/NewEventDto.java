@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.practicum.validator.NoSooner2hFromNow;
+import ru.practicum.validator.annotation.NoSooner2hFromNow;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
