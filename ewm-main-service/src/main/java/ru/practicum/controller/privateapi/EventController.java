@@ -7,6 +7,9 @@ import ru.practicum.dto.event.EventFullDto;
 import ru.practicum.dto.event.EventShortDto;
 import ru.practicum.dto.event.NewEventDto;
 import ru.practicum.dto.event.UpdateEventDto;
+import ru.practicum.dto.party_request.EventRequestStatusUpdateRequest;
+import ru.practicum.dto.party_request.EventRequestStatusUpdateResult;
+import ru.practicum.dto.party_request.PartyRequestDto;
 import ru.practicum.service.event.EventService;
 
 import javax.validation.Valid;
@@ -45,6 +48,19 @@ public class EventController {
                                @Positive @PathVariable long eventId,
                                @Valid @RequestBody UpdateEventDto updateDto) {
         return eventService.userUpdate(userId, eventId, updateDto);
+    }
+
+    @GetMapping("/{eventId}/requests")
+    public List<PartyRequestDto> getPartyRequestsToEvent(@PathVariable @Positive long userId,
+                                                        @PathVariable @Positive long eventId) {
+        return eventService.getAllEventRequests(eventId, userId);
+    }
+
+    @PatchMapping("/{eventId}/requests")
+    public EventRequestStatusUpdateResult updateRequestStatuses(@Positive @PathVariable long userId,
+                                                                @Positive @PathVariable long eventId,
+                                                                @RequestBody EventRequestStatusUpdateRequest updateDto) {
+        return eventService.updateRequestStatuses(eventId, userId, updateDto);
     }
 
 }

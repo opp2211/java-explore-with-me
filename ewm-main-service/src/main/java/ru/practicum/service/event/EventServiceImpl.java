@@ -5,10 +5,17 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.dto.ViewStats;
 import ru.practicum.dto.event.*;
+import ru.practicum.dto.party_request.EventRequestStatusUpdateRequest;
+import ru.practicum.dto.party_request.EventRequestStatusUpdateResult;
+import ru.practicum.dto.party_request.PartyRequestDto;
+import ru.practicum.exception.ConflictException;
+import ru.practicum.exception.NotFoundException;
 import ru.practicum.model.Event;
 import ru.practicum.model.EventState;
+import ru.practicum.model.PartyRequestStatus;
 import ru.practicum.repository.EventRepository;
 import ru.practicum.service.category.CategoryService;
+import ru.practicum.service.party_request.PartyRequestService;
 import ru.practicum.service.user.UserService;
 import ru.practicum.statsclient.StatsClient;
 
@@ -25,6 +32,7 @@ public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final CategoryService categoryService;
     private final UserService userService;
+    private final PartyRequestService partyRequestService;
     private final StatsClient statsClient;
 
     @Override
@@ -72,8 +80,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto getByIdAndUserId(long userId, long eventId) {
-        EventFullDto eventFullDto = eventMapper.toEventFullDto(
-                eventRepository.findByIdAndInitiatorId(eventId, userId));
+        EventFullDto eventFullDto = eventMapper.toEventFullDto(getByIdAndOwnerId(eventId, userId));
         if (eventFullDto != null) {
             List<String> uris = List.of("/events/" + eventFullDto.getId());
             List<ViewStats> stats = statsClient.getStats(LocalDateTime.MIN, LocalDateTime.now(), false, uris);
@@ -201,6 +208,48 @@ public class EventServiceImpl implements EventService {
         applyPatchChanges(event, updateDto);
         eventRepository.save(event);
         return eventMapper.toEventFullDto(event);
+    }
+
+    @Override
+    public List<PartyRequestDto> getAllEventRequests(long eventId, long eventOwnerId) {
+        getByIdAndOwnerId(eventId, eventOwnerId);
+        return partyRequestService.getAllByEvent(eventId);
+    }
+
+    @Override
+    public EventRequestStatusUpdateResult updateRequestStatuses(long eventId, long userId,
+                                                                EventRequestStatusUpdateRequest updateDto) {
+        Event event = getByIdAndOwnerId(eventId, eventId);
+        long requestsLimit = event.getParticipantLimit();
+        long confirmedRequests = 0; //todo
+        if (requestsLimit - confirmedRequests <= 0) {
+            throw new ConflictException("The participant limit has been reached");
+        }
+        EventRequestStatusUpdateResult result = new EventRequestStatusUpdateResult();
+        switch (updateDto.getStatus()) {
+            case CONFIRMED:
+                partyRequestService.confirmRequests(updateDto.getRequestIds(),
+                        requestsLimit - confirmedRequests).forEach(partyRequestDto -> {
+                    if (partyRequestDto.getStatus() == PartyRequestStatus.CONFIRMED) {
+                        result.getConfirmedRequests().add(partyRequestDto);
+                    } else {
+                        result.getRejectedRequests().add(partyRequestDto);
+                    }
+                });
+                break;
+            case REJECTED:
+
+                result.setRejectedRequests(
+                        partyRequestService.rejectRequests(updateDto.getRequestIds()));
+                break;
+        }
+        return result;
+    }
+
+    private Event getByIdAndOwnerId(long eventId, long ownerId) {
+        return eventRepository.findByIdAndInitiatorId(eventId, ownerId).orElseThrow(() ->
+                new NotFoundException(
+                        String.format("Event ID=%d belongs to user ID=%d was not found", eventId, ownerId)));
     }
 
     private void applyPatchChanges(Event event, UpdateEventDto updateDto) {

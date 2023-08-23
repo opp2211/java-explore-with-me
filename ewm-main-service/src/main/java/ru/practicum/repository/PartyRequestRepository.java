@@ -13,6 +13,7 @@ public interface PartyRequestRepository extends JpaRepository<PartyRequest, Long
     boolean existsByEventIdAndRequesterId(long eventId, long requesterId);
 
     List<PartyRequest> findAllByRequesterId(long userId);
+    List<PartyRequest> findAllByEventId(long eventId);
 
     Optional<PartyRequest> findByIdAndRequesterId(long id, long requesterId);
 
@@ -21,4 +22,6 @@ public interface PartyRequestRepository extends JpaRepository<PartyRequest, Long
             "WHERE pr.event.id == :eventId " +
             "GROUP BY pr.event.id ")
     ParticipantsNumber getParticipantsNumberByEventId(@Param("eventId") long eventId);
+
+    List<PartyRequest> findAllByIdIn(List<Long> ids);
 }

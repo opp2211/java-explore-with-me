@@ -1,6 +1,9 @@
 package ru.practicum.service.event;
 
 import ru.practicum.dto.event.*;
+import ru.practicum.dto.party_request.EventRequestStatusUpdateRequest;
+import ru.practicum.dto.party_request.EventRequestStatusUpdateResult;
+import ru.practicum.dto.party_request.PartyRequestDto;
 import ru.practicum.model.Event;
 
 import java.time.LocalDateTime;
@@ -24,4 +27,7 @@ public interface EventService {
     EventFullDto getPublicById(long id);
 
     EventFullDto userUpdate(long userId, long eventId, UpdateEventDto updateDto);
+    List<PartyRequestDto> getAllEventRequests(long eventId, long eventOwnerId);
+    EventRequestStatusUpdateResult updateRequestStatuses(
+            long eventId, long userId, EventRequestStatusUpdateRequest updateDto);
 }
