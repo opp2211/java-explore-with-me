@@ -6,10 +6,10 @@ import org.springframework.stereotype.Service;
 import ru.practicum.dto.category.CategoryDto;
 import ru.practicum.dto.category.CategoryMapper;
 import ru.practicum.dto.category.NewCategoryDto;
+import ru.practicum.exception.NotFoundException;
 import ru.practicum.model.Category;
 import ru.practicum.repository.CategoryRepository;
 
-import javax.persistence.EntityNotFoundException;
 import java.security.InvalidParameterException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -24,11 +24,14 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryDto addNew(NewCategoryDto newCategoryDto) {
         Category newCategory = categoryRepository.save(categoryMapper.toCategory(newCategoryDto));
         return categoryMapper.toCategoryDto(newCategory);
+        //todo: настройка хендлера под обработку исключения "Integrity constraint has been violated."
     }
 
     @Override
     public void deleteById(long catId) {
         categoryRepository.deleteById(catId);
+        //todo: проверка на наличие событий в категории или проброс ислючение от БД при ошибке удаления
+        //todo: ? проверка на наличие категории с переданным ID
     }
 
     @Override
@@ -37,12 +40,13 @@ public class CategoryServiceImpl implements CategoryService {
         category.setName(newCategoryDto.getName());
         categoryRepository.save(category);
         return categoryMapper.toCategoryDto(category);
+        //todo: настройка хендлера под обработку исключения "Integrity constraint has been violated."
     }
 
     @Override
     public Category getById(long id) {
         return categoryRepository.findById(id).orElseThrow(() ->
-                new EntityNotFoundException(String.format("Category ID = %d not found!", id)));
+                new NotFoundException(String.format("Category ID = %d not found!", id)));
     }
 
     @Override

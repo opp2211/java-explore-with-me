@@ -49,6 +49,17 @@ public class CommonHandler {
     }
 
     @ExceptionHandler
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ApiError handleConstraintViolation(ConflictException e) {
+        log.debug(e.getMessage(), e);
+        return new ApiError(
+                HttpStatus.CONFLICT,
+                "Integrity constraint has been violated.",
+                e.getMessage(),
+                LocalDateTime.now().format(EwmMainApp.FORMATTER));
+    }
+
+    @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ApiError handleException(Exception e) {
         log.debug(e.getMessage(), e);
