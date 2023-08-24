@@ -18,15 +18,17 @@ public class PartyRequest {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "event_id")
+    @JoinColumn(name = "event_id", nullable = false)
     private Event event;
 
     @ManyToOne
-    @JoinColumn(name = "requester_id")
+    @JoinColumn(name = "requester_id", nullable = false)
     private User requester;
 
+    @Column(nullable = false)
     private LocalDateTime created;
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private PartyRequestStatus status;
 }
