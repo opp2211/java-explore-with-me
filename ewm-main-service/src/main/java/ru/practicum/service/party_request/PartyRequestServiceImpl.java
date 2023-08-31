@@ -15,6 +15,7 @@ import ru.practicum.service.user.UserService;
 import javax.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,20 +28,16 @@ public class PartyRequestServiceImpl implements PartyRequestService {
 
     @Override
     public PartyRequestDto addNew(long userId, long eventId) {
-        boolean hasDuplicate = partyRequestRepository.existsByEventIdAndRequesterId(eventId, userId);
-        if (hasDuplicate) {
-            throw new RuntimeException(); //todo: exceptions
-        }
         User user = userService.getById(userId);
         Event event = eventService.getById(eventId);
         if (event.getInitiator().getId() == userId) {
-            throw new RuntimeException();
+            throw new RuntimeException(); //todo: exceptions
         }
         if (event.getState() != EventState.PUBLISHED) {
             throw new RuntimeException();
         }
-        if (event.getParticipantLimit() != 0 ||
-                getParticipantsNumberByEventId(eventId).getNumber() >= event.getParticipantLimit()) {
+        if (event.getParticipantLimit() != 0 &&
+                getNumberConfirmedRequestsByEventId(eventId) >= event.getParticipantLimit()) {
             throw new RuntimeException();
         }
 
@@ -86,7 +83,7 @@ public class PartyRequestServiceImpl implements PartyRequestService {
             if (partyRequest.getStatus() != PartyRequestStatus.PENDING) {
                 throw new ConflictException("Request must have status PENDING");
             }
-            if (confirmLimit >= 0) {
+            if (confirmLimit > 0) {
                 partyRequest.setStatus(PartyRequestStatus.CONFIRMED);
                 confirmLimit--;
             } else {
@@ -115,7 +112,18 @@ public class PartyRequestServiceImpl implements PartyRequestService {
                 .collect(Collectors.toList());
     }
 
-    private ParticipantsNumber getParticipantsNumberByEventId(long eventId) {
-        return partyRequestRepository.getParticipantsNumberByEventId(eventId);
+    @Override
+    public Map<Long, Long> getMapEventIdConfirmedReqsNumber(List<Long> eventIds) {
+        return partyRequestRepository
+                .getAllParticipantsNumberByStatusAndEventIdIn(PartyRequestStatus.CONFIRMED, eventIds)
+                .stream()
+                .collect(Collectors.toMap(ParticipantsNumber::getEventId, ParticipantsNumber::getNumber));
+
+        //todo: некоторые айди без пары?
+    }
+
+    @Override
+    public Long getNumberConfirmedRequestsByEventId(Long eventId) {
+        return partyRequestRepository.countByEventId(eventId);
     }
 }

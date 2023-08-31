@@ -53,7 +53,8 @@ CREATE TABLE IF NOT EXISTS party_requests (
   requester_id BIGINT REFERENCES users NOT NULL,
   created TIMESTAMP NOT NULL,
   status VARCHAR(20) NOT NULL,
-  CONSTRAINT pk_party_request PRIMARY KEY (id)
+  CONSTRAINT pk_party_request PRIMARY KEY (id),
+  CONSTRAINT uq_category_name UNIQUE (event_id, requester_id)
 );
 
 

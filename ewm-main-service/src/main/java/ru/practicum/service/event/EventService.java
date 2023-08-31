@@ -13,7 +13,7 @@ import java.util.List;
 public interface EventService {
     EventFullDto addNew(NewEventDto newEventDto, long initiatorId);
     List<EventShortDto> getAllByUserId(long userId, int from, int size);
-    EventFullDto getByIdAndUserId(long userId, long eventId);
+    EventFullDto getFullDtoByIdAndOwnerId(long userId, long eventId);
     Event getById(long id);
     List<Event> getAllByIds(Collection<Long> ids);
     List<EventFullDto> getAllAdminFiltered(List<Long> userIds, List<String> strStates, List<Long> catIds,

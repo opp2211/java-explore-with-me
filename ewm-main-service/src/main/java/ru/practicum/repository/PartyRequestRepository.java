@@ -5,13 +5,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import ru.practicum.dto.party_request.ParticipantsNumber;
 import ru.practicum.model.PartyRequest;
+import ru.practicum.model.PartyRequestStatus;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface PartyRequestRepository extends JpaRepository<PartyRequest, Long> {
-    boolean existsByEventIdAndRequesterId(long eventId, long requesterId);
-
     List<PartyRequest> findAllByRequesterId(long userId);
     List<PartyRequest> findAllByEventId(long eventId);
 
@@ -19,9 +18,13 @@ public interface PartyRequestRepository extends JpaRepository<PartyRequest, Long
 
     @Query("SELECT new ru.practicum.dto.party_request.ParticipantsNumber(pr.event.id, COUNT(*)) " +
             "FROM PartyRequest pr " +
-            "WHERE pr.event.id == :eventId " +
+            "WHERE pr.status = :status " +
+            "AND pr.event.id IN :eventIds " +
             "GROUP BY pr.event.id ")
-    ParticipantsNumber getParticipantsNumberByEventId(@Param("eventId") long eventId);
+    List<ParticipantsNumber> getAllParticipantsNumberByStatusAndEventIdIn(@Param("status") PartyRequestStatus status,
+                                                                          @Param("eventIds") List<Long> eventIds);
 
     List<PartyRequest> findAllByIdIn(List<Long> ids);
+
+    long countByEventId(long eventId);
 }
