@@ -30,4 +30,5 @@ public interface EventService {
     List<PartyRequestDto> getAllEventRequests(long eventId, long eventOwnerId);
     EventRequestStatusUpdateResult updateRequestStatuses(
             long eventId, long userId, EventRequestStatusUpdateRequest updateDto);
+    List<EventShortDto> fillShortDtos(Collection<EventShortDto> shortDtos);
 }

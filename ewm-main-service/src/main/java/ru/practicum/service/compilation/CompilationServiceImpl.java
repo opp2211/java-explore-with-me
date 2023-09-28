@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.dto.compilation.CompilationDto;
 import ru.practicum.dto.compilation.CompilationMapper;
 import ru.practicum.dto.compilation.NewCompilationDto;
+import ru.practicum.dto.event.EventShortDto;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.model.Compilation;
 import ru.practicum.repository.CompilationRepository;
@@ -14,7 +15,9 @@ import ru.practicum.service.event.EventService;
 import ru.practicum.validator.StaticValidator;
 
 import javax.persistence.EntityNotFoundException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -54,16 +57,21 @@ public class CompilationServiceImpl implements CompilationService {
         List<Compilation> compilations = pinned != null ?
                 compilationRepository.findAllByPinned(pinned, pageable) :
                 compilationRepository.findAll(pageable).toList();
-        //todo: fill views and confirmedReq
-        return compilations.stream()
+
+        Set<EventShortDto> shortDtoSelectSet = new HashSet<>();
+        List<CompilationDto> compilationDtos = compilations.stream()
                 .map(compilationMapper::toCompilationDto)
+                .peek(compilationDto -> shortDtoSelectSet.addAll(compilationDto.getEvents()))
                 .collect(Collectors.toList());
+        eventService.fillShortDtos(shortDtoSelectSet);
+        return compilationDtos;
     }
 
     @Override
     public CompilationDto getDtoById(long compId) {
-        return compilationMapper.toCompilationDto(getById(compId));
-        //todo: fill views and confirmedReq
+        CompilationDto compilationDto = compilationMapper.toCompilationDto(getById(compId));
+        eventService.fillShortDtos(compilationDto.getEvents());
+        return compilationDto;
     }
 
     private Compilation getById(long compId) {

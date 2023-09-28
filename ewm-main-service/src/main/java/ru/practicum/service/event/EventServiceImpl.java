@@ -52,8 +52,8 @@ public class EventServiceImpl implements EventService {
     public List<EventShortDto> getAllByUserId(long userId, int from, int size) {
         StaticValidator.validateFromSize(from, size);
         List<Event> events = eventRepository.findAllByInitiatorId(userId, PageRequest.of(from/size, size));
-
-        return getFilledShortDtos(events);
+        List<EventShortDto> shortDtos = events.stream().map(eventMapper::toEventShortDto).collect(Collectors.toList());
+        return fillShortDtos(shortDtos);
     }
 
     @Override
@@ -215,17 +215,21 @@ public class EventServiceImpl implements EventService {
         return result;
     }
 
-    private List<EventShortDto> getFilledShortDtos(List<Event> events) {
-        List<Long> eventIds = events.stream().map(Event::getId).collect(Collectors.toList());
+    @Override
+    public List<EventShortDto> fillShortDtos(Collection<EventShortDto> shortDtos) {
+        if (shortDtos == null || shortDtos.isEmpty())
+            return new ArrayList<>();
+
+        List<Long> eventIds = shortDtos.stream().map(EventShortDto::getId).collect(Collectors.toList());
 
         Map<Long, Long> mapIdViews = getMapIdViews(eventIds);
         Map<Long, Long> mapIdConfirmedReqs = getMapIdConfirmedReqs(eventIds);
 
-        return events.stream()
-                .map(eventMapper::toEventShortDto)
-                .peek(eventShortDto -> eventShortDto.setViews(mapIdViews.get(eventShortDto.getId())))
-                .peek(eventShortDto -> eventShortDto.setConfirmedRequests(mapIdConfirmedReqs.get(eventShortDto.getId())))
-                .collect(Collectors.toList());
+        shortDtos.forEach(eventShortDto -> {
+            eventShortDto.setViews(mapIdViews.get(eventShortDto.getId()));
+            eventShortDto.setConfirmedRequests(mapIdConfirmedReqs.get(eventShortDto.getId()));
+        });
+        return new ArrayList<>(shortDtos);
     }
 
     private Map<Long, Long> getMapIdViews(List<Long> eventIds) {
