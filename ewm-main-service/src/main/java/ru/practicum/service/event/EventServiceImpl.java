@@ -9,6 +9,7 @@ import ru.practicum.dto.party_request.EventRequestStatusUpdateRequest;
 import ru.practicum.dto.party_request.EventRequestStatusUpdateResult;
 import ru.practicum.dto.party_request.PartyRequestDto;
 import ru.practicum.exception.ConflictException;
+import ru.practicum.exception.ForbiddenException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.model.Event;
 import ru.practicum.model.EventState;
@@ -154,16 +155,16 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto userUpdate(long userId, long eventId, UpdateEventDto updateDto) {
-        if (LocalDateTime.now().plusHours(2).isAfter(updateDto.getEventDate())) {
-            throw new RuntimeException();
+        if (updateDto.getEventDate().isBefore(LocalDateTime.now().plusHours(2))) {
+            throw new ConflictException("Event datetime could not be sooner than 2h");
         }
         userService.getById(userId);
         Event event = getById(eventId);
         if (event.getState() == EventState.PUBLISHED) {
-            throw new RuntimeException(); //todo: forbidden or conflict?
+            throw new ConflictException("Only pending or canceled events can be changed");
         }
         if (userId != event.getInitiator().getId()) {
-            throw new RuntimeException();
+            throw new ForbiddenException("Only event owner can update event");
         }
         switch (updateDto.getStateAction()) {
             case SEND_TO_REVIEW:
@@ -175,7 +176,7 @@ public class EventServiceImpl implements EventService {
         }
         applyPatchChanges(event, updateDto);
         eventRepository.save(event);
-        return eventMapper.toEventFullDto(event);
+        return eventMapper.toEventFullDto(event); //todo: fill FullDto ?
     }
 
     @Override

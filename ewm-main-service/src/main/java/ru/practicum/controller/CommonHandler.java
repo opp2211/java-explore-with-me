@@ -10,6 +10,7 @@ import ru.practicum.dto.ApiError;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 
+import javax.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
 
 @RestControllerAdvice
@@ -50,7 +51,7 @@ public class CommonHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ApiError handleConstraintViolation(ConflictException e) {
+    public ApiError handleConstraintViolation(ConstraintViolationException e) {
         log.debug(e.getMessage(), e);
         return new ApiError(
                 HttpStatus.CONFLICT,
