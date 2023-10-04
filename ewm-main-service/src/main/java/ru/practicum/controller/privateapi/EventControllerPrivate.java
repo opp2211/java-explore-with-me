@@ -21,7 +21,7 @@ import java.util.List;
 @RequestMapping("/users/{userId}/events")
 @RequiredArgsConstructor
 @Validated
-public class EventController {
+public class EventControllerPrivate {
     private final EventService eventService;
 
     @PostMapping

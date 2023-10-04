@@ -13,7 +13,7 @@ import java.util.List;
 @RequestMapping("/users/{userId}/requests")
 @RequiredArgsConstructor
 @Validated
-public class PartyRequestController {
+public class PartyRequestControllerPrivate {
     private final PartyRequestService partyRequestService;
 
     @PostMapping

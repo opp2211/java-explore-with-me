@@ -14,7 +14,7 @@ import java.util.List;
 @RequestMapping("/compilations")
 @RequiredArgsConstructor
 @Validated
-public class CompilationController {
+public class CompilationControllerPublic {
     private final CompilationService compilationService;
 
     @GetMapping
