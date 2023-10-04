@@ -2,6 +2,7 @@ package ru.practicum.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -9,6 +10,7 @@ import ru.practicum.EwmMainApp;
 import ru.practicum.dto.ApiError;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
+import ru.practicum.exception.ValidationException;
 
 import javax.validation.ConstraintViolationException;
 import java.time.LocalDateTime;
@@ -16,7 +18,7 @@ import java.time.LocalDateTime;
 @RestControllerAdvice
 @Slf4j
 public class CommonHandler {
-    @ExceptionHandler //todo specify exceptions
+    @ExceptionHandler({ValidationException.class, MethodArgumentNotValidException.class}) //todo specify exceptions
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError handleBadRequest(Exception e) {
         log.debug(e.getMessage(), e);

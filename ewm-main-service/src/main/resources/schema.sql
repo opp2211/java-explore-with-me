@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS compilations (
 
 CREATE TABLE IF NOT EXISTS event_compilations (
   event_id BIGINT REFERENCES events NOT NULL,
-  compilation_id BOOLEAN REFERENCES compilations NOT NULL,
+  compilation_id BIGINT REFERENCES compilations NOT NULL,
   CONSTRAINT pk_event_compilation PRIMARY KEY (event_id, compilation_id)
 );
 
@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS party_requests (
   created TIMESTAMP NOT NULL,
   status VARCHAR(20) NOT NULL,
   CONSTRAINT pk_party_request PRIMARY KEY (id),
-  CONSTRAINT uq_category_name UNIQUE (event_id, requester_id)
+  CONSTRAINT uq_party_request_event_requester UNIQUE (event_id, requester_id)
 );
 
 
