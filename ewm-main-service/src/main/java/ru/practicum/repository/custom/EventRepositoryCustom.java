@@ -10,6 +10,5 @@ public interface EventRepositoryCustom {
                                     LocalDateTime rangeStart, LocalDateTime rangeEnd, int from, int size);
 
     List<Event> getAllPublicFiltered(String text, List<Long> catIds, Boolean paid,
-                                     LocalDateTime rangeStart, LocalDateTime rangeEnd,
-                                     Boolean onlyAvailable, int from, int size);
+                                     LocalDateTime rangeStart, LocalDateTime rangeEnd, int from, int size);
 }

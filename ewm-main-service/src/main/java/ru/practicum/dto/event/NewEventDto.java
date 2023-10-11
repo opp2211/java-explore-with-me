@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.practicum.validator.annotation.NoSooner2hFromNow;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
@@ -24,12 +23,11 @@ public class NewEventDto {
     private String annotation;
     @NotNull
     @Positive
-    private Integer category;
+    private Long category;
     @NotBlank
     @Size(min = 20, max = 7000)
     private String description;
     @NotNull
-    @NoSooner2hFromNow
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime eventDate;
     @NotNull

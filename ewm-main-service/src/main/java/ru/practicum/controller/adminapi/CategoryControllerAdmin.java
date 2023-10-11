@@ -6,6 +6,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.category.CategoryDto;
 import ru.practicum.dto.category.NewCategoryDto;
+import ru.practicum.dto.category.UpdateCategoryDto;
 import ru.practicum.service.category.CategoryService;
 
 import javax.validation.Valid;
@@ -31,7 +32,7 @@ public class CategoryControllerAdmin {
 
     @PatchMapping("/{catId}")
     public CategoryDto update(@PathVariable @Positive long catId,
-                              @RequestBody @Valid NewCategoryDto newCategoryDto) {
-        return categoryService.update(catId, newCategoryDto);
+                              @RequestBody @Valid UpdateCategoryDto updateCategoryDto) {
+        return categoryService.update(catId, updateCategoryDto);
     }
 }

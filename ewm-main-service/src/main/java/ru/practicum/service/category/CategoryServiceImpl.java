@@ -6,11 +6,14 @@ import org.springframework.stereotype.Service;
 import ru.practicum.dto.category.CategoryDto;
 import ru.practicum.dto.category.CategoryMapper;
 import ru.practicum.dto.category.NewCategoryDto;
+import ru.practicum.dto.category.UpdateCategoryDto;
+import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.model.Category;
 import ru.practicum.repository.CategoryRepository;
+import ru.practicum.repository.EventRepository;
+import ru.practicum.validator.StaticValidator;
 
-import java.security.InvalidParameterException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,34 +22,31 @@ import java.util.stream.Collectors;
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
+    private final EventRepository eventRepository;
 
     @Override
     public CategoryDto addNew(NewCategoryDto newCategoryDto) {
         Category newCategory = categoryRepository.save(categoryMapper.toCategory(newCategoryDto));
         return categoryMapper.toCategoryDto(newCategory);
-        //todo: настройка хендлера под обработку исключения "Integrity constraint has been violated."
     }
 
     @Override
     public void deleteById(long catId) {
+        getById(catId);
+        if (eventRepository.existsByCategoryId(catId)) {
+            throw new ConflictException("The category is not empty");
+        }
         categoryRepository.deleteById(catId);
-        //todo: проверка на наличие событий в категории или проброс ислючение от БД при ошибке удаления
-        //todo: ? проверка на наличие категории с переданным ID
     }
 
     @Override
-    public CategoryDto update(long catId, NewCategoryDto newCategoryDto) {
+    public CategoryDto update(long catId, UpdateCategoryDto updateDto) {
         Category category = getById(catId);
-        category.setName(newCategoryDto.getName());
+        if (updateDto.getName() != null) {
+            category.setName(updateDto.getName());
+        }
         categoryRepository.save(category);
         return categoryMapper.toCategoryDto(category);
-        //todo: настройка хендлера под обработку исключения "Integrity constraint has been violated."
-    }
-
-    @Override
-    public Category getById(long id) {
-        return categoryRepository.findById(id).orElseThrow(() ->
-                new NotFoundException(String.format("Category ID = %d not found!", id)));
     }
 
     @Override
@@ -56,12 +56,14 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<CategoryDto> getAllDtos(int from, int size) {
-        if (from % size != 0) {
-            throw new InvalidParameterException(String.format(
-                    "Parameter 'from'(%d) must be a multiple of parameter 'size'(%d)", from, size));
-        }
+        StaticValidator.validateFromSize(from, size);
         return categoryRepository.findAll(PageRequest.of(from/size, size)).stream()
                 .map(categoryMapper::toCategoryDto)
                 .collect(Collectors.toList());
+    }
+
+    private Category getById(long id) {
+        return categoryRepository.findById(id).orElseThrow(() ->
+                new NotFoundException(String.format("Category ID = %d not found!", id)));
     }
 }

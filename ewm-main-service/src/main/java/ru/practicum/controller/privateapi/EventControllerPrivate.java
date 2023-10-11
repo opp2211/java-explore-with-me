@@ -53,7 +53,7 @@ public class EventControllerPrivate {
     @GetMapping("/{eventId}/requests")
     public List<PartyRequestDto> getPartyRequestsToEvent(@PathVariable @Positive long userId,
                                                          @PathVariable @Positive long eventId) {
-        return eventService.getAllEventRequests(eventId, userId);
+        return eventService.getRequestsByEventIdAndEventOwner(eventId, userId);
     }
 
     @PatchMapping("/{eventId}/requests")

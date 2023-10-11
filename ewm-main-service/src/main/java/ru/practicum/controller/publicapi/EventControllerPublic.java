@@ -8,6 +8,7 @@ import ru.practicum.dto.event.EventShortDto;
 import ru.practicum.dto.event.EventSort;
 import ru.practicum.service.event.EventService;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.time.LocalDateTime;
@@ -29,13 +30,14 @@ public class EventControllerPublic {
                                               @RequestParam(defaultValue = "false") Boolean onlyAvailable,
                                               @RequestParam(required = false) EventSort sort,
                                               @RequestParam(defaultValue = "0") @PositiveOrZero int from,
-                                              @RequestParam(defaultValue = "10") @Positive int size) {
+                                              @RequestParam(defaultValue = "10") @Positive int size,
+                                              HttpServletRequest request) {
         return eventService.getAllPublicFiltered(
-                text, catIds, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size);
+                text, catIds, paid, rangeStart, rangeEnd, onlyAvailable, sort, from, size, request);
     }
 
     @GetMapping("/{id}")
-    public EventFullDto getPublicById(@PathVariable @Positive long id) {
-        return eventService.getPublicById(id);
+    public EventFullDto getPublicById(@PathVariable @Positive long id, HttpServletRequest request) {
+        return eventService.getPublicById(id, request);
     }
 }

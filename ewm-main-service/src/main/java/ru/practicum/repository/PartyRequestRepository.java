@@ -7,6 +7,7 @@ import ru.practicum.dto.party_request.ParticipantsNumber;
 import ru.practicum.model.PartyRequest;
 import ru.practicum.model.PartyRequestStatus;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,9 +23,9 @@ public interface PartyRequestRepository extends JpaRepository<PartyRequest, Long
             "AND pr.event.id IN :eventIds " +
             "GROUP BY pr.event.id ")
     List<ParticipantsNumber> getAllParticipantsNumberByStatusAndEventIdIn(@Param("status") PartyRequestStatus status,
-                                                                          @Param("eventIds") List<Long> eventIds);
+                                                                          @Param("eventIds") Collection<Long> eventIds);
 
     List<PartyRequest> findAllByIdIn(List<Long> ids);
 
-    long countByEventId(long eventId);
+    long countByEventIdAndStatus(long eventId, PartyRequestStatus status);
 }

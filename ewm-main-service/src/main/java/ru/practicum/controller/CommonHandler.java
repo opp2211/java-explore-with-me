@@ -1,8 +1,10 @@
 package ru.practicum.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -18,7 +20,8 @@ import java.time.LocalDateTime;
 @RestControllerAdvice
 @Slf4j
 public class CommonHandler {
-    @ExceptionHandler({ValidationException.class, MethodArgumentNotValidException.class}) //todo specify exceptions
+    @ExceptionHandler({ValidationException.class, MethodArgumentNotValidException.class,
+            ConstraintViolationException.class, MissingServletRequestParameterException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ApiError handleBadRequest(Exception e) {
         log.debug(e.getMessage(), e);
@@ -40,7 +43,7 @@ public class CommonHandler {
                 LocalDateTime.now().format(EwmMainApp.FORMATTER));
     }
 
-    @ExceptionHandler
+    @ExceptionHandler()
     @ResponseStatus(HttpStatus.CONFLICT)
     public ApiError handleConflict(ConflictException e) {
         log.debug(e.getMessage(), e);
@@ -53,7 +56,7 @@ public class CommonHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.CONFLICT)
-    public ApiError handleConstraintViolation(ConstraintViolationException e) {
+    public ApiError handleDataIntegrityViolation(DataIntegrityViolationException e) {
         log.debug(e.getMessage(), e);
         return new ApiError(
                 HttpStatus.CONFLICT,

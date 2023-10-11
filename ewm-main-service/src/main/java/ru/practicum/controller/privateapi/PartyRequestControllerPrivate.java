@@ -1,6 +1,7 @@
 package ru.practicum.controller.privateapi;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.party_request.PartyRequestDto;
@@ -17,6 +18,7 @@ public class PartyRequestControllerPrivate {
     private final PartyRequestService partyRequestService;
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public PartyRequestDto addNew(@Positive @PathVariable long userId,
                                   @Positive @RequestParam long eventId) {
         return partyRequestService.addNew(userId, eventId);
@@ -29,7 +31,7 @@ public class PartyRequestControllerPrivate {
 
     @PatchMapping("/{requestId}/cancel")
     public void cancelOwn(@Positive @PathVariable long userId,
-                       @Positive @PathVariable long requestId) {
+                          @Positive @PathVariable long requestId) {
         partyRequestService.cancelOwn(userId, requestId);
     }
 }

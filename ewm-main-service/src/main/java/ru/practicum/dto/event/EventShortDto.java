@@ -29,7 +29,7 @@ public class EventShortDto {
 
     private UserShortDto initiator;
 
-    private Long confirmedRequests = 0L;
-
     private Long views = 0L;
+
+    private Long confirmedRequests = 0L;
 }

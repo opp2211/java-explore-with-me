@@ -52,8 +52,7 @@ public class EventRepositoryImpl implements EventRepositoryCustom {
 
     @Override
     public List<Event> getAllPublicFiltered(String text, List<Long> catIds, Boolean paid,
-                                            LocalDateTime rangeStart, LocalDateTime rangeEnd,
-                                            Boolean onlyAvailable, int from, int size) {
+                                            LocalDateTime rangeStart, LocalDateTime rangeEnd, int from, int size) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Event> cq = cb.createQuery(Event.class);
         Root<Event> event = cq.from(Event.class);
@@ -78,7 +77,6 @@ public class EventRepositoryImpl implements EventRepositoryCustom {
         if (rangeEnd != null) {
             predicates.add(cb.lessThanOrEqualTo(event.get("event_date"), rangeEnd));
         }
-        //todo: onlyAvailable
 
         cq.where(predicates.toArray(new Predicate[0]));
         cq.orderBy(cb.desc(event.get("event_date")));
