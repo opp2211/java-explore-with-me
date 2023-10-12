@@ -8,6 +8,8 @@ import java.util.List;
 
 public interface UserService {
     List<UserDto> getByIdsPageable(Collection<Long> ids, int from, int size);
+
     UserDto addNew(NewUserDto newUserDto);
+
     void delete(long userId);
 }

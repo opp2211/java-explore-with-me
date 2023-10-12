@@ -6,6 +6,8 @@ import java.util.List;
 
 public interface PartyRequestService {
     PartyRequestDto addNew(long userId, long eventId);
+
     List<PartyRequestDto> getAllByUserId(long userId);
+
     PartyRequestDto cancelOwn(long userId, long requestId);
 }

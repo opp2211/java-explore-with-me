@@ -34,8 +34,8 @@ public class EventControllerPrivate {
 
     @GetMapping
     public List<EventShortDto> getAllByOwnerId(@PathVariable @Positive long userId,
-                                              @RequestParam(defaultValue = "0") @PositiveOrZero int from,
-                                              @RequestParam(defaultValue = "10") @Positive int size) {
+                                               @RequestParam(defaultValue = "0") @PositiveOrZero int from,
+                                               @RequestParam(defaultValue = "10") @Positive int size) {
         return eventService.getAllByUserId(userId, from, size);
     }
 

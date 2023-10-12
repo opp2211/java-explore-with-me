@@ -16,6 +16,7 @@ public abstract class CompilationMapper {
 
     @Autowired
     EventMapper eventMapper;
+
     @Mapping(target = "events", source = "events")
     public abstract Compilation toCompilation(NewCompilationDto newCompilationDto, List<Event> events);
 
@@ -25,8 +26,8 @@ public abstract class CompilationMapper {
             Compilation compilation, Map<Long, Long> eventsViewsMap, Map<Long, Long> eventsConfReqsMap);
 
     public List<CompilationDto> toCompilationDtoList(List<Compilation> compilations,
-                                                      Map<Long, Long> eventsViewsMap,
-                                                      Map<Long, Long> eventsConfReqsMap) {
+                                                     Map<Long, Long> eventsViewsMap,
+                                                     Map<Long, Long> eventsConfReqsMap) {
         if (compilations == null)
             return null;
 

@@ -51,7 +51,8 @@ public class StatsClient {
         ResponseEntity<List<ViewStats>> responseEntity = restTemplate.exchange(url,
                 HttpMethod.GET,
                 buildHttpEntity(null),
-                new ParameterizedTypeReference<List<ViewStats>>() {},
+                new ParameterizedTypeReference<List<ViewStats>>() {
+                },
                 parameters);
 
         return responseEntity.getBody();

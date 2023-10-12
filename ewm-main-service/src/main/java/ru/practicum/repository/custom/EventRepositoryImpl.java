@@ -19,6 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class EventRepositoryImpl implements EventRepositoryCustom {
     private final EntityManager em;
+
     @Override
     public List<Event> getAllAdminFiltered(List<Long> userIds, List<EventState> states, List<Long> catIds,
                                            LocalDateTime rangeStart, LocalDateTime rangeEnd, int from, int size) {

@@ -62,7 +62,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<EventShortDto> getAllByUserId(long userId, int from, int size) {
         StaticValidator.validateFromSize(from, size);
-        List<Event> events = eventRepository.findAllByInitiatorId(userId, PageRequest.of(from/size, size));
+        List<Event> events = eventRepository.findAllByInitiatorId(userId, PageRequest.of(from / size, size));
         List<Long> eventIds = events.stream().map(Event::getId).collect(Collectors.toList());
         return eventMapper.toEventShortDtoList(events, getEventsViewsMap(eventIds), getEventsConfReqsMap(eventIds));
     }
@@ -101,7 +101,7 @@ public class EventServiceImpl implements EventService {
                         String.format("Cannot publish the event because it's not in the right state: %s",
                                 event.getState()));
             }
-            switch (updateDto.getStateAction()){
+            switch (updateDto.getStateAction()) {
                 case PUBLISH_EVENT:
                     event.setState(EventState.PUBLISHED);
                     event.setPublishedOn(LocalDateTime.now());
@@ -263,6 +263,7 @@ public class EventServiceImpl implements EventService {
                         viewStats -> Long.parseLong(viewStats.getUri().substring("/events/".length())),
                         ViewStats::getHits));
     }
+
     private Long getEventViews(Long eventId) {
         Map<Long, Long> viewsMap = getEventsViewsMap(List.of(eventId));
         return viewsMap.getOrDefault(eventId, 0L);
@@ -276,6 +277,7 @@ public class EventServiceImpl implements EventService {
                         ParticipantsNumber::getEventId,
                         ParticipantsNumber::getNumber));
     }
+
     private Long getEventConfReqs(Long eventId) {
         return partyRequestRepository.countByEventIdAndStatus(eventId, PartyRequestStatus.CONFIRMED);
     }

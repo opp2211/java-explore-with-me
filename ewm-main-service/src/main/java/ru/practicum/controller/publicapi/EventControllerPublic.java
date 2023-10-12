@@ -27,11 +27,11 @@ public class EventControllerPublic {
                                               @RequestParam(name = "categories", required = false) List<Long> catIds,
                                               @RequestParam(required = false) Boolean paid,
                                               @RequestParam(required = false)
-                                                  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-                                                  LocalDateTime rangeStart,
+                                              @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+                                              LocalDateTime rangeStart,
                                               @RequestParam(required = false)
-                                                  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-                                                  LocalDateTime rangeEnd,
+                                              @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+                                              LocalDateTime rangeEnd,
                                               @RequestParam(defaultValue = "false") Boolean onlyAvailable,
                                               @RequestParam(required = false) EventSort sort,
                                               @RequestParam(defaultValue = "0") @PositiveOrZero int from,

@@ -24,7 +24,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public List<UserDto> getByIdsPageable(Collection<Long> ids, int from, int size) {
         StaticValidator.validateFromSize(from, size);
-        Pageable pageable = PageRequest.of(from/size, size);
+        Pageable pageable = PageRequest.of(from / size, size);
 
         List<User> users;
         if (ids == null || ids.isEmpty()) {

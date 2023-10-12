@@ -34,6 +34,7 @@ public class CompilationServiceImpl implements CompilationService {
     private final PartyRequestRepository partyRequestRepository;
     private final StatsClient statsClient;
     private final EventRepository eventRepository;
+
     @Override
     public CompilationDto addNew(NewCompilationDto newCompilationDto) {
         List<Long> eventIds = newCompilationDto.getEvents();
@@ -71,7 +72,7 @@ public class CompilationServiceImpl implements CompilationService {
     public List<CompilationDto> getAllDtos(Boolean pinned, int from, int size) {
         StaticValidator.validateFromSize(from, size);
 
-        Pageable pageable = PageRequest.of(from/size, size);
+        Pageable pageable = PageRequest.of(from / size, size);
         List<Compilation> compilations = pinned != null ?
                 compilationRepository.findAllByPinned(pinned, pageable) :
                 compilationRepository.findAll(pageable).toList();

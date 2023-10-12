@@ -57,7 +57,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public List<CategoryDto> getAllDtos(int from, int size) {
         StaticValidator.validateFromSize(from, size);
-        return categoryRepository.findAll(PageRequest.of(from/size, size)).stream()
+        return categoryRepository.findAll(PageRequest.of(from / size, size)).stream()
                 .map(categoryMapper::toCategoryDto)
                 .collect(Collectors.toList());
     }

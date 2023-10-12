@@ -13,6 +13,7 @@ import java.util.Optional;
 
 public interface PartyRequestRepository extends JpaRepository<PartyRequest, Long> {
     List<PartyRequest> findAllByRequesterId(long userId);
+
     List<PartyRequest> findAllByEventId(long eventId);
 
     Optional<PartyRequest> findByIdAndRequesterId(long id, long requesterId);

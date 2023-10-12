@@ -31,7 +31,7 @@ public class PartyRequestControllerPrivate {
 
     @PatchMapping("/{requestId}/cancel")
     public PartyRequestDto cancelOwn(@Positive @PathVariable long userId,
-                          @Positive @PathVariable long requestId) {
+                                     @Positive @PathVariable long requestId) {
         return partyRequestService.cancelOwn(userId, requestId);
     }
 }
