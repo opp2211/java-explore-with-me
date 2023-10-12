@@ -19,9 +19,7 @@ public class NewUserDto {
     private String name;
 
     @NotBlank
-    @Email(message = "Invalid email",
-            regexp = "^(?=.{1,64}@)[A-Za-z0-9_-]+(\\.[A-Za-z0-9_-]+)*@" +
-                    "[^-][A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$")
+    @Email(message = "Invalid email")
     @Size(min = 6, max = 254)
     private String email;
 }

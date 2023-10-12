@@ -1,6 +1,7 @@
 package ru.practicum.controller.publicapi;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.event.EventFullDto;
@@ -25,8 +26,12 @@ public class EventControllerPublic {
     public List<EventShortDto> getAllFiltered(@RequestParam(required = false) String text,
                                               @RequestParam(name = "categories", required = false) List<Long> catIds,
                                               @RequestParam(required = false) Boolean paid,
-                                              @RequestParam(required = false) LocalDateTime rangeStart,
-                                              @RequestParam(required = false) LocalDateTime rangeEnd,
+                                              @RequestParam(required = false)
+                                                  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+                                                  LocalDateTime rangeStart,
+                                              @RequestParam(required = false)
+                                                  @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+                                                  LocalDateTime rangeEnd,
                                               @RequestParam(defaultValue = "false") Boolean onlyAvailable,
                                               @RequestParam(required = false) EventSort sort,
                                               @RequestParam(defaultValue = "0") @PositiveOrZero int from,

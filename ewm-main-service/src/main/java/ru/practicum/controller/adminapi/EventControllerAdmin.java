@@ -1,6 +1,7 @@
 package ru.practicum.controller.adminapi;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.event.EventFullDto;
@@ -25,8 +26,8 @@ public class EventControllerAdmin {
             @RequestParam(name = "users", required = false) List<Long> userIds,
             @RequestParam(name = "states", required = false) List<String> strStates,
             @RequestParam(name = "categories", required = false) List<Long> catIds,
-            @RequestParam(required = false) LocalDateTime rangeStart,
-            @RequestParam(required = false) LocalDateTime rangeEnd,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeStart,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") LocalDateTime rangeEnd,
             @RequestParam(defaultValue = "0") @PositiveOrZero int from,
             @RequestParam(defaultValue = "10") @Positive int size) {
         return eventService.getAllAdminFiltered(userIds, strStates, catIds, rangeStart, rangeEnd, from, size);

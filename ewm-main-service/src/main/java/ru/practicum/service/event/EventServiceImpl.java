@@ -10,6 +10,7 @@ import ru.practicum.dto.party_request.*;
 import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.ForbiddenException;
 import ru.practicum.exception.NotFoundException;
+import ru.practicum.exception.ValidationException;
 import ru.practicum.model.Event;
 import ru.practicum.model.EventState;
 import ru.practicum.model.PartyRequest;
@@ -23,7 +24,9 @@ import ru.practicum.validator.StaticValidator;
 
 import javax.persistence.EntityNotFoundException;
 import javax.servlet.http.HttpServletRequest;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -41,7 +44,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventFullDto addNew(NewEventDto newEventDto, long initiatorId) {
         if (LocalDateTime.now().plusHours(2).isAfter(newEventDto.getEventDate())) {
-            throw new ConflictException(
+            throw new ValidationException(
                     String.format("Field: eventDate. Error: должно содержать дату, которая еще не наступила. " +
                             "Value: %s", newEventDto.getEventDate().toString()));
         }
@@ -76,16 +79,18 @@ public class EventServiceImpl implements EventService {
     public List<EventFullDto> getAllAdminFiltered(List<Long> userIds, List<String> strStates, List<Long> catIds,
                                                   LocalDateTime rangeStart, LocalDateTime rangeEnd, int from, int size) {
         StaticValidator.validateFromSize(from, size);
+        List<EventState> states = strStates == null ?
+                null : strStates.stream().map(EventState::valueOf).collect(Collectors.toList());
         List<Event> events =
-                eventRepository.getAllAdminFiltered(userIds, strStates, catIds, rangeStart, rangeEnd, from, size);
+                eventRepository.getAllAdminFiltered(userIds, states, catIds, rangeStart, rangeEnd, from, size);
         List<Long> eventIds = events.stream().map(Event::getId).collect(Collectors.toList());
         return eventMapper.toEventFullDtoList(events, getEventsViewsMap(eventIds), getEventsConfReqsMap(eventIds));
     }
 
     @Override
     public EventFullDto adminUpdate(long eventId, UpdateEventDto updateDto) {
-        if (LocalDateTime.now().plusHours(1).isAfter(updateDto.getEventDate())) {
-            throw new ConflictException(
+        if (updateDto.getEventDate() != null && LocalDateTime.now().plusHours(1).isAfter(updateDto.getEventDate())) {
+            throw new ValidationException(
                     String.format("Field: eventDate. Error: должно содержать дату, которая еще не наступила. " +
                             "Value: %s", updateDto.getEventDate().toString()));
         }
@@ -117,6 +122,9 @@ public class EventServiceImpl implements EventService {
                                                     Boolean onlyAvailable, EventSort sort, int from, int size,
                                                     HttpServletRequest request) {
         StaticValidator.validateFromSize(from, size);
+        if (rangeStart != null && rangeEnd != null && rangeEnd.isBefore(rangeStart)) {
+            throw new ValidationException("End datetime cannot be before Start");
+        }
         if (rangeStart == null && rangeEnd == null) {
             rangeStart = LocalDateTime.now();
         }
@@ -152,7 +160,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventFullDto getPublicById(long id, HttpServletRequest request) {
         Event event = eventRepository.findByIdAndState(id, EventState.PUBLISHED).orElseThrow(() ->
-                new EntityNotFoundException(String.format("Event ID = %d not found or unavailable!", id)));
+                new NotFoundException(String.format("Event ID = %d not found or unavailable!", id)));
 
         statsClient.saveStatHit(new EndpointHitDto("ewm-main",
                 request.getRequestURI(),
@@ -164,8 +172,8 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public EventFullDto userUpdate(long userId, long eventId, UpdateEventDto updateDto) {
-        if (LocalDateTime.now().plusHours(2).isAfter(updateDto.getEventDate())) {
-            throw new ConflictException(
+        if (updateDto.getEventDate() != null && LocalDateTime.now().plusHours(2).isAfter(updateDto.getEventDate())) {
+            throw new ValidationException(
                     String.format("Field: eventDate. Error: должно содержать дату, которая еще не наступила. " +
                             "Value: %s", updateDto.getEventDate().toString()));
         }
@@ -178,13 +186,17 @@ public class EventServiceImpl implements EventService {
         if (userId != event.getInitiator().getId()) {
             throw new ForbiddenException("Only event owner can update event");
         }
-        switch (updateDto.getStateAction()) {
-            case SEND_TO_REVIEW:
-                event.setState(EventState.PENDING);
-                break;
-            case CANCEL_REVIEW:
-                event.setState(EventState.CANCELED);
-                break;
+        if (updateDto.getStateAction() != null) {
+            switch (updateDto.getStateAction()) {
+                case SEND_TO_REVIEW:
+                    event.setState(EventState.PENDING);
+                    break;
+                case CANCEL_REVIEW:
+                    event.setState(EventState.CANCELED);
+                    break;
+                default:
+                    throw new ValidationException("Unsupported action state");
+            }
         }
         applyPatchChanges(event, updateDto);
         eventRepository.save(event);
@@ -202,7 +214,7 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventRequestStatusUpdateResult updateRequestStatuses(long eventId, long userId,
                                                                 EventRequestStatusUpdateRequest updateDto) {
-        Event event = getByIdAndOwnerId(eventId, eventId);
+        Event event = getByIdAndOwnerId(eventId, userId);
         long requestsLimit = event.getParticipantLimit();
         long numberConfRequests = partyRequestRepository.countByEventIdAndStatus(eventId, PartyRequestStatus.CONFIRMED);
         if (updateDto.getStatus() == PartyRequestStatus.CONFIRMED &&
@@ -243,16 +255,17 @@ public class EventServiceImpl implements EventService {
         Set<String> urisForStatsMap = eventIds.stream()
                 .map(id -> "/events/" + id)
                 .collect(Collectors.toSet());
-        return statsClient.getStats(LocalDateTime.MIN, LocalDateTime.now(), true, urisForStatsMap)
+        List<ViewStats> stats = statsClient.getStats(LocalDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault()),
+                LocalDateTime.now(), true, urisForStatsMap);
+        return stats
                 .stream()
                 .collect(Collectors.toMap(
                         viewStats -> Long.parseLong(viewStats.getUri().substring("/events/".length())),
                         ViewStats::getHits));
     }
     private Long getEventViews(Long eventId) {
-        return statsClient.getStats(LocalDateTime.MIN, LocalDateTime.now(),
-                        true, List.of("/events/" + eventId))
-                .get(0).getHits();
+        Map<Long, Long> viewsMap = getEventsViewsMap(List.of(eventId));
+        return viewsMap.getOrDefault(eventId, 0L);
     }
 
     private Map<Long, Long> getEventsConfReqsMap(Collection<Long> eventIds) {
@@ -280,11 +293,11 @@ public class EventServiceImpl implements EventService {
         }
         String newAnnotation = updateDto.getAnnotation();
         if (newAnnotation != null) {
-            event.setTitle(newAnnotation);
+            event.setAnnotation(newAnnotation);
         }
         String newDescription = updateDto.getDescription();
         if (newDescription != null) {
-            event.setTitle(newDescription);
+            event.setDescription(newDescription);
         }
         LocalDateTime newEventDate = updateDto.getEventDate();
         if (newEventDate != null) {

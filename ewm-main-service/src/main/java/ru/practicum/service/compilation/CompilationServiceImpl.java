@@ -20,7 +20,9 @@ import ru.practicum.repository.PartyRequestRepository;
 import ru.practicum.statsclient.StatsClient;
 import ru.practicum.validator.StaticValidator;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -99,10 +101,14 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     private Map<Long, Long> getEventsViewsMap(Collection<Long> eventIds) {
+        if (eventIds == null || eventIds.isEmpty()) {
+            return Collections.EMPTY_MAP;
+        }
         Set<String> urisForStatsMap = eventIds.stream()
                 .map(id -> "/events/" + id)
                 .collect(Collectors.toSet());
-        return statsClient.getStats(LocalDateTime.MIN, LocalDateTime.now(), true, urisForStatsMap)
+        return statsClient.getStats(LocalDateTime.ofInstant(Instant.EPOCH, ZoneId.systemDefault()),
+                        LocalDateTime.now(), true, urisForStatsMap)
                 .stream()
                 .collect(Collectors.toMap(
                         viewStats -> Long.parseLong(viewStats.getUri().substring("/events/".length())),
@@ -110,6 +116,9 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     private Map<Long, Long> getEventsConfReqsMap(Collection<Long> eventIds) {
+        if (eventIds == null || eventIds.isEmpty()) {
+            return Collections.EMPTY_MAP;
+        }
         return partyRequestRepository
                 .getAllParticipantsNumberByStatusAndEventIdIn(PartyRequestStatus.CONFIRMED, eventIds)
                 .stream()
@@ -119,6 +128,9 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     private List<Event> getEventsByIds(Collection<Long> ids) {
+        if (ids == null || ids.isEmpty()) {
+            return Collections.EMPTY_LIST;
+        }
         Set<Long> setIds = new HashSet<>(ids);
         List<Event> foundEvents = eventRepository.findAllById(setIds);
         Set<Long> foundIds = foundEvents.stream()

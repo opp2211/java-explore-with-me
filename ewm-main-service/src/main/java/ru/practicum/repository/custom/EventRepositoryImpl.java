@@ -20,7 +20,7 @@ import java.util.List;
 public class EventRepositoryImpl implements EventRepositoryCustom {
     private final EntityManager em;
     @Override
-    public List<Event> getAllAdminFiltered(List<Long> userIds, List<String> strStates, List<Long> catIds,
+    public List<Event> getAllAdminFiltered(List<Long> userIds, List<EventState> states, List<Long> catIds,
                                            LocalDateTime rangeStart, LocalDateTime rangeEnd, int from, int size) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Event> cq = cb.createQuery(Event.class);
@@ -28,19 +28,19 @@ public class EventRepositoryImpl implements EventRepositoryCustom {
         List<Predicate> predicates = new ArrayList<>();
 
         if (userIds != null && !userIds.isEmpty()) {
-            predicates.add(event.get("user_id").in(userIds));
+            predicates.add(event.get("initiator").get("id").in(userIds));
         }
-        if (strStates != null && !strStates.isEmpty()) {
-            predicates.add(event.get("state").in(strStates));
+        if (states != null && !states.isEmpty()) {
+            predicates.add(event.get("state").in(states));
         }
         if (catIds != null && !catIds.isEmpty()) {
-            predicates.add(event.get("category_id").in(catIds));
+            predicates.add(event.get("category").get("id").in(catIds));
         }
         if (rangeStart != null) {
-            predicates.add(cb.greaterThanOrEqualTo(event.get("event_date"), rangeStart));
+            predicates.add(cb.greaterThanOrEqualTo(event.get("eventDate"), rangeStart));
         }
         if (rangeEnd != null) {
-            predicates.add(cb.lessThanOrEqualTo(event.get("event_date"), rangeEnd));
+            predicates.add(cb.lessThanOrEqualTo(event.get("eventDate"), rangeEnd));
         }
 
         cq.where(predicates.toArray(new Predicate[0]));
@@ -66,20 +66,20 @@ public class EventRepositoryImpl implements EventRepositoryCustom {
             predicates.add(cb.or(annotationLike, descriptionLike));
         }
         if (catIds != null && !catIds.isEmpty()) {
-            predicates.add(event.get("category_id").in(catIds));
+            predicates.add(event.get("category").get("id").in(catIds));
         }
         if (paid != null) {
             predicates.add(cb.equal(event.get("paid"), paid));
         }
         if (rangeStart != null) {
-            predicates.add(cb.greaterThanOrEqualTo(event.get("event_date"), rangeStart));
+            predicates.add(cb.greaterThanOrEqualTo(event.get("eventDate"), rangeStart));
         }
         if (rangeEnd != null) {
-            predicates.add(cb.lessThanOrEqualTo(event.get("event_date"), rangeEnd));
+            predicates.add(cb.lessThanOrEqualTo(event.get("eventDate"), rangeEnd));
         }
 
         cq.where(predicates.toArray(new Predicate[0]));
-        cq.orderBy(cb.desc(event.get("event_date")));
+        cq.orderBy(cb.desc(event.get("eventDate")));
         TypedQuery<Event> typedQuery = em.createQuery(cq);
         typedQuery.setFirstResult(from);
         typedQuery.setMaxResults(size);

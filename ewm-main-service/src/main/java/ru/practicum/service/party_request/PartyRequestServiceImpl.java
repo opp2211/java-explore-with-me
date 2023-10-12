@@ -13,6 +13,7 @@ import ru.practicum.repository.UserRepository;
 
 import javax.persistence.EntityNotFoundException;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,8 +43,9 @@ public class PartyRequestServiceImpl implements PartyRequestService {
         PartyRequest partyRequest = PartyRequest.builder()
                 .event(event)
                 .requester(user)
-                .created(LocalDateTime.now())
-                .status(event.getRequestModeration() ? PartyRequestStatus.PENDING : PartyRequestStatus.CONFIRMED)
+                .created(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS))
+                .status(!event.getRequestModeration() || event.getParticipantLimit() == 0 ?
+                        PartyRequestStatus.CONFIRMED : PartyRequestStatus.PENDING)
                 .build();
         PartyRequest savedRequest = partyRequestRepository.save(partyRequest);
         return partyRequestMapper.toPartyRequestDto(savedRequest);
@@ -58,11 +60,12 @@ public class PartyRequestServiceImpl implements PartyRequestService {
     }
 
     @Override
-    public void cancelOwn(long userId, long requestId) {
+    public PartyRequestDto cancelOwn(long userId, long requestId) {
         PartyRequest partyRequest = partyRequestRepository.findByIdAndRequesterId(requestId, userId).orElseThrow(() ->
                 new EntityNotFoundException(String.format("ParticipationRequest ID = %d not found!", requestId)));
-        partyRequest.setStatus(PartyRequestStatus.REJECTED); //canceled?
+        partyRequest.setStatus(PartyRequestStatus.CANCELED);
         partyRequestRepository.save(partyRequest);
+        return partyRequestMapper.toPartyRequestDto(partyRequest);
     }
 
     private Long getNumberConfirmedRequestsByEventId(Long eventId) {

@@ -64,10 +64,6 @@ public class Event {
     @Column(name = "location_lon", nullable = false)
     private Float locationLon;
 
-    @ManyToMany
-    @JoinTable(
-            name = "event_compilations",
-            joinColumns = @JoinColumn(name = "event_id"),
-            inverseJoinColumns = @JoinColumn(name = "compilation_id"))
+    @ManyToMany(mappedBy = "events")
     private List<Compilation> compilations;
 }

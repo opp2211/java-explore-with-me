@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class StatsClient { //todo: refactor to Component?
+public class StatsClient {
 
     public static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private final RestTemplate restTemplate;
@@ -45,7 +45,7 @@ public class StatsClient { //todo: refactor to Component?
 
         if (uris != null) {
             url = url + "&uris={uris}";
-            parameters.put("uris", uris);
+            parameters.put("uris", String.join(",", uris));
         }
 
         ResponseEntity<List<ViewStats>> responseEntity = restTemplate.exchange(url,

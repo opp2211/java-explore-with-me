@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.EndpointHitDto;
 import ru.practicum.dto.ViewStats;
+import ru.practicum.exception.ValidationException;
 import ru.practicum.model.EndpointHitMapper;
 import ru.practicum.repository.StatsRepository;
 
@@ -34,6 +35,9 @@ public class StatsController {
                                     @RequestParam(defaultValue = "false") boolean unique) {
         LocalDateTime start = LocalDateTime.parse(URLDecoder.decode(startString, StandardCharsets.UTF_8), formatter);
         LocalDateTime end = LocalDateTime.parse(URLDecoder.decode(endString, StandardCharsets.UTF_8), formatter);
+        if (end.isBefore(start)) {
+            throw new ValidationException("End datetime cannot be before Start");
+        }
         if (uris == null || uris.isEmpty()) {
             return statsRepository.getViewStats(start, end, unique);
         } else {

@@ -28,11 +28,11 @@ public interface EventMapper {
 
     @Mapping(source = "event.locationLat", target = "location.lat")
     @Mapping(source = "event.locationLon", target = "location.lon")
-    @Mapping(target = "views", source = "views")
+    @Mapping(target = "views", source = "views", defaultValue = "0L")
     @Mapping(target = "confirmedRequests", source = "confirmedRequests")
     EventFullDto toEventFullDto(Event event, Long views, Long confirmedRequests);
 
-    @Mapping(target = "views", source = "views")
+    @Mapping(target = "views", source = "views", defaultValue = "0L")
     @Mapping(target = "confirmedRequests", source = "confirmedRequests")
     EventShortDto toEventShortDto(Event event, Long views, Long confirmedRequests);
 
@@ -44,7 +44,9 @@ public interface EventMapper {
 
         List<EventShortDto> list = new ArrayList<>(events.size());
         for (Event event : events) {
-            list.add(toEventShortDto(event, eventsViewsMap.get(event.getId()), eventsConfReqsMap.get(event.getId())));
+            list.add(toEventShortDto(event,
+                    eventsViewsMap.getOrDefault(event.getId(), 0L),
+                    eventsConfReqsMap.getOrDefault(event.getId(), 0L)));
         }
         return list;
     }
@@ -57,7 +59,9 @@ public interface EventMapper {
 
         List<EventFullDto> list = new ArrayList<>(events.size());
         for (Event event : events) {
-            list.add(toEventFullDto(event, eventsViewsMap.get(event.getId()), eventsConfReqsMap.get(event.getId())));
+            list.add(toEventFullDto(event,
+                    eventsViewsMap.getOrDefault(event.getId(), 0L),
+                    eventsConfReqsMap.getOrDefault(event.getId(), 0L)));
         }
         return list;
     }

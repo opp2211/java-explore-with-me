@@ -1,6 +1,7 @@
 package ru.practicum.controller.privateapi;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.event.EventFullDto;
@@ -25,6 +26,7 @@ public class EventControllerPrivate {
     private final EventService eventService;
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public EventFullDto addNew(@PathVariable @Positive long userId,
                                @RequestBody @Valid NewEventDto newEventDto) {
         return eventService.addNew(newEventDto, userId);

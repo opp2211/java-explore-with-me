@@ -23,6 +23,10 @@ public class Compilation {
     @Column(nullable = false)
     private Boolean pinned;
 
-    @ManyToMany(mappedBy = "compilations")
+    @ManyToMany
+    @JoinTable(
+            name = "event_compilations",
+            joinColumns = @JoinColumn(name = "compilation_id"),
+            inverseJoinColumns = @JoinColumn(name = "event_id"))
     private List<Event> events;
 }
