@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.dto.ViewStats;
 import ru.practicum.dto.compilation.CompilationDto;
 import ru.practicum.dto.compilation.CompilationMapper;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
+@Transactional
 public class CompilationServiceImpl implements CompilationService {
     private final CompilationMapper compilationMapper;
     private final CompilationRepository compilationRepository;
@@ -68,6 +70,7 @@ public class CompilationServiceImpl implements CompilationService {
                 updatedComp, getEventsViewsMap(updateDto.getEvents()), getEventsConfReqsMap(updateDto.getEvents()));
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<CompilationDto> getAllDtos(Boolean pinned, int from, int size) {
         StaticValidator.validateFromSize(from, size);
@@ -86,6 +89,7 @@ public class CompilationServiceImpl implements CompilationService {
                 compilations, getEventsViewsMap(eventIds), getEventsConfReqsMap(eventIds));
     }
 
+    @Transactional(readOnly = true)
     @Override
     public CompilationDto getDtoById(long compId) {
         Compilation compilation = getById(compId);

@@ -2,6 +2,7 @@ package ru.practicum.service.party_request;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.dto.party_request.PartyRequestDto;
 import ru.practicum.dto.party_request.PartyRequestMapper;
 import ru.practicum.exception.ConflictException;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class PartyRequestServiceImpl implements PartyRequestService {
     private final PartyRequestMapper partyRequestMapper;
     private final PartyRequestRepository partyRequestRepository;
@@ -51,6 +53,7 @@ public class PartyRequestServiceImpl implements PartyRequestService {
         return partyRequestMapper.toPartyRequestDto(savedRequest);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<PartyRequestDto> getAllByUserId(long userId) {
         getUserById(userId);

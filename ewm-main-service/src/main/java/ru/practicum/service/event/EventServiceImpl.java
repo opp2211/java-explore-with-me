@@ -3,6 +3,7 @@ package ru.practicum.service.event;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.dto.EndpointHitDto;
 import ru.practicum.dto.ViewStats;
 import ru.practicum.dto.event.*;
@@ -32,6 +33,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class EventServiceImpl implements EventService {
     private final EventMapper eventMapper;
     private final EventRepository eventRepository;
@@ -59,6 +61,7 @@ public class EventServiceImpl implements EventService {
         return eventMapper.toEventFullDto(savedEvent, 0L, 0L);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<EventShortDto> getAllByUserId(long userId, int from, int size) {
         StaticValidator.validateFromSize(from, size);
@@ -67,6 +70,7 @@ public class EventServiceImpl implements EventService {
         return eventMapper.toEventShortDtoList(events, getEventsViewsMap(eventIds), getEventsConfReqsMap(eventIds));
     }
 
+    @Transactional(readOnly = true)
     @Override
     public EventFullDto getFullDtoByIdAndOwnerId(long userId, long eventId) {
         return eventMapper.toEventFullDto(
@@ -75,6 +79,7 @@ public class EventServiceImpl implements EventService {
                 getEventConfReqs(eventId));
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<EventFullDto> getAllAdminFiltered(List<Long> userIds, List<String> strStates, List<Long> catIds,
                                                   LocalDateTime rangeStart, LocalDateTime rangeEnd, int from, int size) {
@@ -116,6 +121,7 @@ public class EventServiceImpl implements EventService {
         return eventMapper.toEventFullDto(event, getEventViews(eventId), getEventConfReqs(eventId));
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<EventShortDto> getAllPublicFiltered(String text, List<Long> catIds, Boolean paid,
                                                     LocalDateTime rangeStart, LocalDateTime rangeEnd,
@@ -157,6 +163,7 @@ public class EventServiceImpl implements EventService {
         return shortEvents;
     }
 
+    @Transactional(readOnly = true)
     @Override
     public EventFullDto getPublicById(long id, HttpServletRequest request) {
         Event event = eventRepository.findByIdAndState(id, EventState.PUBLISHED).orElseThrow(() ->
@@ -203,6 +210,7 @@ public class EventServiceImpl implements EventService {
         return eventMapper.toEventFullDto(event, getEventViews(eventId), getEventConfReqs(eventId));
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<PartyRequestDto> getRequestsByEventIdAndEventOwner(long eventId, long eventOwnerId) {
         getByIdAndOwnerId(eventId, eventOwnerId);

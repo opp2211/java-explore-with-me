@@ -3,6 +3,7 @@ package ru.practicum.service.category;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.dto.category.CategoryDto;
 import ru.practicum.dto.category.CategoryMapper;
 import ru.practicum.dto.category.NewCategoryDto;
@@ -19,6 +20,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
     private final CategoryMapper categoryMapper;
@@ -49,11 +51,13 @@ public class CategoryServiceImpl implements CategoryService {
         return categoryMapper.toCategoryDto(category);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public CategoryDto getDtoById(long id) {
         return categoryMapper.toCategoryDto(getById(id));
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<CategoryDto> getAllDtos(int from, int size) {
         StaticValidator.validateFromSize(from, size);

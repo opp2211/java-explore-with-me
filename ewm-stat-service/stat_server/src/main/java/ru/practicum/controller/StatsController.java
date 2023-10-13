@@ -2,6 +2,7 @@ package ru.practicum.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.dto.EndpointHitDto;
 import ru.practicum.dto.ViewStats;
@@ -17,6 +18,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@Transactional
 public class StatsController {
     public static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private final StatsRepository statsRepository;
@@ -29,6 +31,7 @@ public class StatsController {
     }
 
     @GetMapping("/stats")
+    @Transactional(readOnly = true)
     public List<ViewStats> getStats(@RequestParam(name = "start") String startString,
                                     @RequestParam(name = "end") String endString,
                                     @RequestParam(required = false) List<String> uris,
