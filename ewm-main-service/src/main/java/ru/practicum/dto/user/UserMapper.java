@@ -1,0 +1,13 @@
+package ru.practicum.dto.user;
+
+import org.mapstruct.Mapper;
+import ru.practicum.model.User;
+
+@Mapper(componentModel = "spring")
+public interface UserMapper {
+    UserDto toUserDto(User user);
+
+    User toUser(NewUserDto newUserDto);
+
+    UserShortDto toUserShortDto(User user);
+}

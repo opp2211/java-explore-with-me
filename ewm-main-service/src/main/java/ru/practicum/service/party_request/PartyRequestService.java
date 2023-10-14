@@ -1,0 +1,13 @@
+package ru.practicum.service.party_request;
+
+import ru.practicum.dto.party_request.PartyRequestDto;
+
+import java.util.List;
+
+public interface PartyRequestService {
+    PartyRequestDto addNew(long userId, long eventId);
+
+    List<PartyRequestDto> getAllByUserId(long userId);
+
+    PartyRequestDto cancelOwn(long userId, long requestId);
+}
