@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import ru.practicum.EwmMainApp;
 import ru.practicum.dto.ApiError;
 import ru.practicum.exception.ConflictException;
+import ru.practicum.exception.ForbiddenException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.ValidationException;
 
@@ -39,6 +40,17 @@ public class CommonHandler {
         return new ApiError(
                 HttpStatus.NOT_FOUND,
                 "The required object was not found.",
+                e.getMessage(),
+                LocalDateTime.now().format(EwmMainApp.FORMATTER));
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ApiError handleForbidden(ForbiddenException e) {
+        log.debug(e.getMessage(), e);
+        return new ApiError(
+                HttpStatus.FORBIDDEN,
+                "Forbidden.",
                 e.getMessage(),
                 LocalDateTime.now().format(EwmMainApp.FORMATTER));
     }

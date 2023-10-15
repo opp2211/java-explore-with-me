@@ -12,10 +12,7 @@ import ru.practicum.exception.ConflictException;
 import ru.practicum.exception.ForbiddenException;
 import ru.practicum.exception.NotFoundException;
 import ru.practicum.exception.ValidationException;
-import ru.practicum.model.Event;
-import ru.practicum.model.EventState;
-import ru.practicum.model.PartyRequest;
-import ru.practicum.model.PartyRequestStatus;
+import ru.practicum.model.*;
 import ru.practicum.repository.CategoryRepository;
 import ru.practicum.repository.EventRepository;
 import ru.practicum.repository.PartyRequestRepository;
@@ -52,10 +49,8 @@ public class EventServiceImpl implements EventService {
         }
         Event newEvent = eventMapper.toEvent(
                 newEventDto,
-                categoryRepository.findById(newEventDto.getCategory()).orElseThrow(() ->
-                        new NotFoundException(String.format("Category ID = %d not found!", newEventDto.getCategory()))),
-                userRepository.findById(initiatorId).orElseThrow(() ->
-                        new EntityNotFoundException(String.format("User ID = %d not found!", initiatorId))));
+                getCategoryById(newEventDto.getCategory()),
+                getUserById(initiatorId));
 
         Event savedEvent = eventRepository.save(newEvent);
         return eventMapper.toEventFullDto(savedEvent, 0L, 0L);
@@ -99,7 +94,7 @@ public class EventServiceImpl implements EventService {
                     String.format("Field: eventDate. Error: должно содержать дату, которая еще не наступила. " +
                             "Value: %s", updateDto.getEventDate().toString()));
         }
-        Event event = getById(eventId);
+        Event event = getEventById(eventId);
         if (updateDto.getStateAction() != null) {
             if (event.getState() != EventState.PENDING) {
                 throw new ConflictException(
@@ -184,9 +179,8 @@ public class EventServiceImpl implements EventService {
                     String.format("Field: eventDate. Error: должно содержать дату, которая еще не наступила. " +
                             "Value: %s", updateDto.getEventDate().toString()));
         }
-        userRepository.findById(userId).orElseThrow(() ->
-                new EntityNotFoundException(String.format("User ID = %d not found!", userId)));
-        Event event = getById(eventId);
+        getUserById(userId);
+        Event event = getEventById(eventId);
         if (event.getState() == EventState.PUBLISHED) {
             throw new ConflictException("Only pending or canceled events can be changed");
         }
@@ -254,9 +248,19 @@ public class EventServiceImpl implements EventService {
         return result;
     }
 
-    private Event getById(long id) {
+    private Event getEventById(long id) {
         return eventRepository.findById(id).orElseThrow(() ->
                 new NotFoundException(String.format("Event ID = %d not found!", id)));
+    }
+
+    private Category getCategoryById(long catId) {
+        return categoryRepository.findById(catId).orElseThrow(() ->
+                new NotFoundException(String.format("Category ID = %d not found!", catId)));
+    }
+
+    private User getUserById(long userId) {
+        return userRepository.findById(userId).orElseThrow(() ->
+                new EntityNotFoundException(String.format("User ID = %d not found!", userId)));
     }
 
     private Map<Long, Long> getEventsViewsMap(Collection<Long> eventIds) {
@@ -315,8 +319,7 @@ public class EventServiceImpl implements EventService {
         }
         Long newCategoryId = updateDto.getCategory();
         if (newCategoryId != null) {
-            event.setCategory(categoryRepository.findById(newCategoryId).orElseThrow(() ->
-                    new NotFoundException(String.format("Category ID = %d not found!", newCategoryId))));
+            event.setCategory(getCategoryById(newCategoryId));
         }
         Boolean newPaid = updateDto.getPaid();
         if (newPaid != null) {
